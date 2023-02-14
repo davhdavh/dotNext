@@ -203,4 +203,17 @@ public static partial class ConfigurationExtensions
         var cluster = builder.ApplicationServices.GetRequiredService<RaftHttpCluster>();
         return builder.Map(cluster.ProtocolPath, cluster.ConfigureConsensusProtocolHandler);
     }
+    
+    /// <summary>
+    /// Setup Raft protocol handler as middleware for the specified application.
+    /// </summary>
+    /// <param name="builder">The application builder.</param>
+    /// <param name="configureEndpoint">The configured application builder for the cluster endpoint prior to processing the cluster requests.</param>
+    /// <returns>The configured application builder.</returns>
+    [CLSCompliant(false)]
+    public static IApplicationBuilder UseConsensusProtocolHandler(this IApplicationBuilder builder, Func<IApplicationBuilder, IApplicationBuilder> configureEndpoint)
+    {
+       var cluster = builder.ApplicationServices.GetRequiredService<RaftHttpCluster>();
+       return builder.Map(cluster.ProtocolPath, endPointBuilder => cluster.ConfigureConsensusProtocolHandler(configureEndpoint(endPointBuilder)));
+    }    
 }
